@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../models/contact.dart';
 import '../services/twilio_sms_service.dart';
 
 class SmsScreen extends StatefulWidget {
-  const SmsScreen({super.key});
+  final Contact contact;
+  const SmsScreen({super.key, required this.contact});
 
   @override
   State<SmsScreen> createState() => _SmsScreenState();
@@ -14,8 +16,7 @@ class _SmsScreenState extends State<SmsScreen> {
   final _messageController = TextEditingController();
   final _scrollController  = ScrollController();
 
-  static const String _contactNumber  = '+12708170271';
-  static const String _contactDisplay = '(270) 817-0271';
+  String get _contactNumber => widget.contact.number;
 
   List<ChatMessage> _messages = [];
   bool _loading = true;
@@ -86,9 +87,9 @@ class _SmsScreenState extends State<SmsScreen> {
         message: text,
       );
       if (response.statusCode != 201) {
-        // Remove optimistic message on failure
         setState(() => _messages = _messages.where((m) => m.sid != optimistic.sid).toList());
-        throw Exception(jsonDecode(response.body)['message'] ?? response.body);
+        final body = jsonDecode(response.body);
+        throw Exception('${response.statusCode}: ${body['message'] ?? body}');
       }
       // Sync with Twilio after a short delay so the message appears in API
       await Future.delayed(const Duration(seconds: 2));
@@ -105,16 +106,22 @@ class _SmsScreenState extends State<SmsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _ContactHeader(display: _contactDisplay, number: _contactNumber),
-        Expanded(child: _buildMessages()),
-        _InputBar(
-          controller: _messageController,
-          sending: _sending,
-          onSend: _sendMessage,
-        ),
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.contact.name),
+        leading: const BackButton(),
+      ),
+      body: Column(
+        children: [
+          _ContactHeader(contact: widget.contact),
+          Expanded(child: _buildMessages()),
+          _InputBar(
+            controller: _messageController,
+            sending: _sending,
+            onSend: _sendMessage,
+          ),
+        ],
+      ),
     );
   }
 
@@ -157,9 +164,8 @@ class _SmsScreenState extends State<SmsScreen> {
 // ── Contact Header ────────────────────────────────────────────────────────────
 
 class _ContactHeader extends StatelessWidget {
-  final String display;
-  final String number;
-  const _ContactHeader({required this.display, required this.number});
+  final Contact contact;
+  const _ContactHeader({required this.contact});
 
   @override
   Widget build(BuildContext context) {
@@ -174,15 +180,20 @@ class _ContactHeader extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundColor: scheme.primary,
-            child: const Icon(Icons.person, color: Colors.white),
+            child: Text(
+              contact.initials,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(display,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text(number,
+              Text(contact.name,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16)),
+              Text(contact.number,
                   style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),

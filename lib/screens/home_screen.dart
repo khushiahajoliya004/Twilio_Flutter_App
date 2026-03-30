@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'sms_screen.dart';
+import 'conversation_list_screen.dart';
 import 'call_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,11 +11,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-
-  final List<Widget> _pages = const [
-    SmsScreen(),
-    CallScreen(),
-  ];
+  final _smsKey = GlobalKey<ConversationListScreenState>();
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +25,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _pages[_selectedIndex],
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          ConversationListScreen(key: _smsKey),
+          const CallScreen(),
+        ],
+      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () => _smsKey.currentState?.openAddContact(),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: const Icon(Icons.message, color: Colors.white),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),

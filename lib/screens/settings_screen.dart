@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/twilio_sms_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -25,12 +26,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    
-    // Using your provided credentials as default values for testing
-    _sidController.text = prefs.getString('account_sid') ?? 'ACb70ecf884944a30c7b2f07da81846291';
-    _tokenController.text = prefs.getString('auth_token') ?? '423d5d854574f8b956b68dcf00e8a94d';
-    _numberController.text = prefs.getString('twilio_number') ?? '+18316033400';
-    
+    _sidController.text    = TwilioSmsService.accountSid;
+    _tokenController.text  = TwilioSmsService.authToken;
+    _numberController.text = TwilioSmsService.twilioNumber;
     _accessTokenController.text = prefs.getString('access_token') ?? '';
     setState(() {});
   }
