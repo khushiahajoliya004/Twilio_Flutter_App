@@ -16,9 +16,9 @@ class ChatMessage {
 }
 
 class TwilioSmsService {
-  static const String accountSid = 'ACb70ecf884944a30c7b2f07da81846291';
-  static const String authToken  = '423d5d854574f8b956b68dcf00e8a94d';
-  static const String twilioNumber = '+18316033400';
+  static const String accountSid = 'AC6ed268c11382fe7b7af829468d3f106e';
+  static const String authToken  = '3c6c2b8c03f47df5fb8d8db0d306fbd5';
+  static const String twilioNumber = '+18559054543';
 
   static String get _authHeader =>
       'Basic ${base64Encode(utf8.encode('$accountSid:$authToken'))}';
